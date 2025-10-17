@@ -1,0 +1,443 @@
+1 Бинарное дерево 
+import java.util.*;
+
+public class BinaryTree<T extends Comparable<T>> {
+    private static class Node<T> {
+        T data;
+        Node<T> left;
+        Node<T> right;
+        
+        Node(T value) {
+            this.data = value;
+            this.left = null;
+            this.right = null;
+        }
+    }
+    
+    private Node<T> root;
+    
+    public BinaryTree() {
+        root = null;
+    }
+    
+    // Итеративная вставка
+    public void insert(T value) {
+        if (root == null) {
+            root = new Node<>(value);
+            return;
+        }
+        
+        Node<T> current = root;
+        Node<T> parent = null;
+        
+        while (current != null) {
+            parent = current;
+            if (value.compareTo(current.data) < 0) {
+                current = current.left;
+            } else {
+                current = current.right;
+            }
+        }
+        
+        if (value.compareTo(parent.data) < 0) {
+            parent.left = new Node<>(value);
+        } else {
+            parent.right = new Node<>(value);
+        }
+    }
+    
+    // Рекурсивная вставка
+    public void insertRecursive(T value) {
+        root = insertRecursive(root, value);
+    }
+    
+    private Node<T> insertRecursive(Node<T> node, T value) {
+        if (node == null) {
+            return new Node<>(value);
+        }
+        
+        if (value.compareTo(node.data) < 0) {
+            node.left = insertRecursive(node.left, value);
+        } else {
+            node.right = insertRecursive(node.right, value);
+        }
+        
+        return node;
+    }
+    
+    public boolean search(T value) {
+        return searchRecursive(root, value);
+    }
+    
+    private boolean searchRecursive(Node<T> node, T value) {
+        if (node == null) return false;
+        if (node.data.equals(value)) return true;
+        
+        return value.compareTo(node.data) < 0 ?
+            searchRecursive(node.left, value) :
+            searchRecursive(node.right, value);
+    }
+    
+    // Обход в ширину (BFS)
+    public void levelOrderTraversal() {
+        if (root == null) return;
+        
+        Queue<Node<T>> queue = new LinkedList<>();
+        queue.offer(root);
+        
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            System.out.print(current.data + " ");
+            
+            if (current.left != null) queue.offer(current.left);
+            if (current.right != null) queue.offer(current.right);
+        }
+    }
+    
+    // Рекурсивные обходы
+    public void inOrderTraversal() { inOrderRecursive(root); }
+    public void preOrderTraversal() { preOrderRecursive(root); }
+    public void postOrderTraversal() { postOrderRecursive(root); }
+    
+    private void inOrderRecursive(Node<T> node) {
+        if (node == null) return;
+        inOrderRecursive(node.left);
+        System.out.print(node.data + " ");
+        inOrderRecursive(node.right);
+    }
+    
+    private void preOrderRecursive(Node<T> node) {
+        if (node == null) return;
+        System.out.print(node.data + " ");
+        preOrderRecursive(node.left);
+        preOrderRecursive(node.right);
+    }
+    
+    private void postOrderRecursive(Node<T> node) {
+        if (node == null) return;
+        postOrderRecursive(node.left);
+        postOrderRecursive(node.right);
+        System.out.print(node.data + " ");
+    }
+}
+2 N-арное дерево 
+import java.util.*;
+
+public class NaryTree<T> {
+    private static class Node<T> {
+        T data;
+        List<Node<T>> children;
+        
+        Node(T value) {
+            this.data = value;
+            this.children = new ArrayList<>();
+        }
+    }
+    
+    private Node<T> root;
+    private final int arity;
+    
+    public NaryTree(int arity) {
+        this.root = null;
+        this.arity = arity;
+    }
+    
+    public void insert(T parentValue, T value) {
+        if (root == null) {
+            root = new Node<>(parentValue);
+            addChild(root, value);
+            return;
+        }
+        
+        Node<T> parent = findNode(root, parentValue);
+        if (parent != null && parent.children.size() < arity) {
+            addChild(parent, value);
+        }
+    }
+    
+    public void levelOrderTraversal() {
+        if (root == null) return;
+        
+        Queue<Node<T>> queue = new LinkedList<>();
+        queue.offer(root);
+        
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            System.out.print(current.data + " ");
+            
+            for (Node<T> child : current.children) {
+                queue.offer(child);
+            }
+        }
+    }
+    
+    private void addChild(Node<T> parent, T value) {
+        parent.children.add(new Node<>(value));
+    }
+    
+    private Node<T> findNode(Node<T> node, T value) {
+        if (node == null) return null;
+        if (node.data.equals(value)) return node;
+        
+        for (Node<T> child : node.children) {
+            Node<T> found = findNode(child, value);
+            if (found != null) return found;
+        }
+        
+        return null;
+    }
+}
+3 Граф на основе матрицы смежности 
+import java.util.*;
+
+public class AdjacencyMatrixGraph {
+    private int[][] matrix;
+    private int vertexCount;
+    private boolean isDirected;
+    
+    public AdjacencyMatrixGraph(int n, boolean directed) {
+        this.vertexCount = n;
+        this.isDirected = directed;
+        this.matrix = new int[n][n];
+    }
+    
+    public void addEdge(int from, int to, int weight) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            matrix[from][to] = weight;
+            if (!isDirected) {
+                matrix[to][from] = weight;
+            }
+        }
+    }
+    
+    public void addEdge(int from, int to) {
+        addEdge(from, to, 1);
+    }
+    
+    public void removeEdge(int from, int to) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            matrix[from][to] = 0;
+            if (!isDirected) {
+                matrix[to][from] = 0;
+            }
+        }
+    }
+    
+    public boolean hasEdge(int from, int to) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            return matrix[from][to] != 0;
+        }
+        return false;
+    }
+    
+    // Поиск в ширину (BFS)
+    public void BFS(int startVertex) {
+        boolean[] visited = new boolean[vertexCount];
+        Queue<Integer> queue = new LinkedList<>();
+        
+        visited[startVertex] = true;
+        queue.offer(startVertex);
+        
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+            System.out.print(current + " ");
+            
+            for (int i = 0; i < vertexCount; i++) {
+                if (matrix[current][i] != 0 && !visited[i]) {
+                    visited[i] = true;
+                    queue.offer(i);
+                }
+            }
+        }
+    }
+    
+    // Поиск в глубину (DFS) - итеративный
+    public void DFS(int startVertex) {
+        boolean[] visited = new boolean[vertexCount];
+        Stack<Integer> stack = new Stack<>();
+        
+        stack.push(startVertex);
+        
+        while (!stack.isEmpty()) {
+            int current = stack.pop();
+            
+            if (!visited[current]) {
+                visited[current] = true;
+                System.out.print(current + " ");
+                
+                for (int i = vertexCount - 1; i >= 0; i--) {
+                    if (matrix[current][i] != 0 && !visited[i]) {
+                        stack.push(i);
+                    }
+                }
+            }
+        }
+    }
+    
+    // Рекурсивный DFS
+    public void DFSRecursive(int startVertex) {
+        boolean[] visited = new boolean[vertexCount];
+        DFSRecursive(startVertex, visited);
+    }
+    
+    private void DFSRecursive(int vertex, boolean[] visited) {
+        visited[vertex] = true;
+        System.out.print(vertex + " ");
+        
+        for (int i = 0; i < vertexCount; i++) {
+            if (matrix[vertex][i] != 0 && !visited[i]) {
+                DFSRecursive(i, visited);
+            }
+        }
+    }
+    
+    public void printMatrix() {
+        for (int i = 0; i < vertexCount; i++) {
+            for (int j = 0; j < vertexCount; j++) {
+                System.out.print(matrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+}
+4 Граф на основе списка смежности 
+import java.util.*;
+
+public class AdjacencyListGraph {
+    private static class Edge {
+        int destination;
+        int weight;
+        
+        Edge(int dest, int weight) {
+            this.destination = dest;
+            this.weight = weight;
+        }
+    }
+    
+    private List<List<Edge>> adjacencyList;
+    private int vertexCount;
+    private boolean isDirected;
+    
+    public AdjacencyListGraph(int n, boolean directed) {
+        this.vertexCount = n;
+        this.isDirected = directed;
+        this.adjacencyList = new ArrayList<>();
+        
+        for (int i = 0; i < n; i++) {
+            adjacencyList.add(new ArrayList<>());
+        }
+    }
+    
+    public void addEdge(int from, int to, int weight) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            adjacencyList.get(from).add(new Edge(to, weight));
+            if (!isDirected) {
+                adjacencyList.get(to).add(new Edge(from, weight));
+            }
+        }
+    }
+    
+    public void addEdge(int from, int to) {
+        addEdge(from, to, 1);
+    }
+    
+    public void removeEdge(int from, int to) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            adjacencyList.get(from).removeIf(edge -> edge.destination == to);
+            if (!isDirected) {
+                adjacencyList.get(to).removeIf(edge -> edge.destination == from);
+            }
+        }
+    }
+    
+    public boolean hasEdge(int from, int to) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            for (Edge edge : adjacencyList.get(from)) {
+                if (edge.destination == to) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Поиск в ширину (BFS)
+    public void BFS(int startVertex) {
+        boolean[] visited = new boolean[vertexCount];
+        Queue<Integer> queue = new LinkedList<>();
+        
+        visited[startVertex] = true;
+        queue.offer(startVertex);
+        
+        while (!queue.isEmpty()) {
+            int current = queue.poll();
+            System.out.print(current + " ");
+            
+            for (Edge edge : adjacencyList.get(current)) {
+                if (!visited[edge.destination]) {
+                    visited[edge.destination] = true;
+                    queue.offer(edge.destination);
+                }
+            }
+        }
+    }
+    
+    // Поиск в глубину (DFS) - итеративный
+    public void DFS(int startVertex) {
+        boolean[] visited = new boolean[vertexCount];
+        Stack<Integer> stack = new Stack<>();
+        
+        stack.push(startVertex);
+        
+        while (!stack.isEmpty()) {
+            int current = stack.pop();
+            
+            if (!visited[current]) {
+                visited[current] = true;
+                System.out.print(current + " ");
+                
+                // Добавляем соседей в обратном порядке
+                Stack<Integer> temp = new Stack<>();
+                for (Edge edge : adjacencyList.get(current)) {
+                    if (!visited[edge.destination]) {
+                        temp.push(edge.destination);
+                    }
+                }
+                while (!temp.isEmpty()) {
+                    stack.push(temp.pop());
+                }
+            }
+        }
+    }
+    
+    // Рекурсивный DFS
+    public void DFSRecursive(int startVertex) {
+        boolean[] visited = new boolean[vertexCount];
+        DFSRecursive(startVertex, visited);
+    }
+    
+    private void DFSRecursive(int vertex, boolean[] visited) {
+        visited[vertex] = true;
+        System.out.print(vertex + " ");
+        
+        for (Edge edge : adjacencyList.get(vertex)) {
+            if (!visited[edge.destination]) {
+                DFSRecursive(edge.destination, visited);
+            }
+        }
+    }
+    
+    public void printAdjacencyList() {
+        for (int i = 0; i < vertexCount; i++) {
+            System.out.print(i + ": ");
+            for (Edge edge : adjacencyList.get(i)) {
+                System.out.print("-> " + edge.destination);
+                if (edge.weight != 1) {
+                    System.out.print("(" + edge.weight + ")");
+                }
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+    }
+}
