@@ -1,0 +1,429 @@
+1 Бинарное дерево 
+#include <memory>
+#include <queue>
+
+template<typename T>
+class BinaryTree {
+private:
+    struct Node {
+        T data;
+        std::unique_ptr<Node> left;
+        std::unique_ptr<Node> right;
+        
+        Node(T value) : data(value), left(nullptr), right(nullptr) {}
+    };
+    
+    std::unique_ptr<Node> root;
+    
+    // Рекурсивная вставка
+    void insertRecursive(std::unique_ptr<Node>& node, T value) {
+        if (!node) {
+            node = std::make_unique<Node>(value);
+            return;
+        }
+        
+        if (value < node->data) {
+            insertRecursive(node->left, value);
+        } else {
+            insertRecursive(node->right, value);
+        }
+    }
+    
+    // Рекурсивный поиск
+    bool searchRecursive(const std::unique_ptr<Node>& node, T value) const {
+        if (!node) return false;
+        if (node->data == value) return true;
+        
+        return value < node->data ? 
+            searchRecursive(node->left, value) : 
+            searchRecursive(node->right, value);
+    }
+
+public:
+    BinaryTree() : root(nullptr) {}
+    
+    // Итеративная вставка
+    void insert(T value) {
+        if (!root) {
+            root = std::make_unique<Node>(value);
+            return;
+        }
+        
+        Node* current = root.get();
+        while (true) {
+            if (value < current->data) {
+                if (!current->left) {
+                    current->left = std::make_unique<Node>(value);
+                    break;
+                }
+                current = current->left.get();
+            } else {
+                if (!current->right) {
+                    current->right = std::make_unique<Node>(value);
+                    break;
+                }
+                current = current->right.get();
+            }
+        }
+    }
+    
+    bool search(T value) const {
+        return searchRecursive(root, value);
+    }
+    
+    // Обход в ширину (BFS)
+    void levelOrderTraversal() const {
+        if (!root) return;
+        
+        std::queue<Node*> q;
+        q.push(root.get());
+        
+        while (!q.empty()) {
+            Node* current = q.front();
+            q.pop();
+            
+            std::cout << current->data << " ";
+            
+            if (current->left) q.push(current->left.get());
+            if (current->right) q.push(current->right.get());
+        }
+    }
+    
+    // Рекурсивные обходы
+    void inOrderTraversal() const { inOrderRecursive(root); }
+    void preOrderTraversal() const { preOrderRecursive(root); }
+    void postOrderTraversal() const { postOrderRecursive(root); }
+
+private:
+    void inOrderRecursive(const std::unique_ptr<Node>& node) const {
+        if (!node) return;
+        inOrderRecursive(node->left);
+        std::cout << node->data << " ";
+        inOrderRecursive(node->right);
+    }
+    
+    void preOrderRecursive(const std::unique_ptr<Node>& node) const {
+        if (!node) return;
+        std::cout << node->data << " ";
+        preOrderRecursive(node->left);
+        preOrderRecursive(node->right);
+    }
+    
+    void postOrderRecursive(const std::unique_ptr<Node>& node) const {
+        if (!node) return;
+        postOrderRecursive(node->left);
+        postOrderRecursive(node->right);
+        std::cout << node->data << " ";
+    }
+};
+2 N-арное дерево 
+#include <vector>
+#include <memory>
+#include <queue>
+
+template<typename T>
+class NaryTree {
+private:
+    struct Node {
+        T data;
+        std::vector<std::unique_ptr<Node>> children;
+        
+        Node(T value) : data(value) {}
+    };
+    
+    std::unique_ptr<Node> root;
+    int arity;  // Максимальное количество детей у узла
+
+public:
+    NaryTree(int n) : root(nullptr), arity(n) {}
+    
+    void insert(const T& parentValue, const T& value) {
+        if (!root) {
+            root = std::make_unique<Node>(parentValue);
+            addChild(root.get(), value);
+            return;
+        }
+        
+        Node* parent = findNode(root.get(), parentValue);
+        if (parent && parent->children.size() < arity) {
+            addChild(parent, value);
+        }
+    }
+    
+    void levelOrderTraversal() const {
+        if (!root) return;
+        
+        std::queue<Node*> q;
+        q.push(root.get());
+        
+        while (!q.empty()) {
+            Node* current = q.front();
+            q.pop();
+            
+            std::cout << current->data << " ";
+            
+            for (auto& child : current->children) {
+                q.push(child.get());
+            }
+        }
+    }
+
+private:
+    void addChild(Node* parent, const T& value) {
+        parent->children.push_back(std::make_unique<Node>(value));
+    }
+    
+    Node* findNode(Node* node, const T& value) const {
+        if (!node) return nullptr;
+        if (node->data == value) return node;
+        
+        for (auto& child : node->children) {
+            Node* found = findNode(child.get(), value);
+            if (found) return found;
+        }
+        
+        return nullptr;
+    }
+};
+3 Граф на основе матрицы смежности 
+#include <vector>
+#include <iostream>
+#include <queue>
+#include <stack>
+
+class AdjacencyMatrixGraph {
+private:
+    std::vector<std::vector<int>> matrix;
+    int vertexCount;
+    bool isDirected;
+
+public:
+    AdjacencyMatrixGraph(int n, bool directed = false) 
+        : vertexCount(n), isDirected(directed) {
+        matrix.resize(n, std::vector<int>(n, 0));
+    }
+    
+    void addEdge(int from, int to, int weight = 1) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            matrix[from][to] = weight;
+            if (!isDirected) {
+                matrix[to][from] = weight;
+            }
+        }
+    }
+    
+    void removeEdge(int from, int to) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            matrix[from][to] = 0;
+            if (!isDirected) {
+                matrix[to][from] = 0;
+            }
+        }
+    }
+    
+    bool hasEdge(int from, int to) const {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            return matrix[from][to] != 0;
+        }
+        return false;
+    }
+    
+    // Поиск в ширину (BFS)
+    void BFS(int startVertex) const {
+        std::vector<bool> visited(vertexCount, false);
+        std::queue<int> q;
+        
+        visited[startVertex] = true;
+        q.push(startVertex);
+        
+        while (!q.empty()) {
+            int current = q.front();
+            q.pop();
+            std::cout << current << " ";
+            
+            for (int i = 0; i < vertexCount; ++i) {
+                if (matrix[current][i] != 0 && !visited[i]) {
+                    visited[i] = true;
+                    q.push(i);
+                }
+            }
+        }
+    }
+    
+    // Поиск в глубину (DFS)
+    void DFS(int startVertex) const {
+        std::vector<bool> visited(vertexCount, false);
+        std::stack<int> s;
+        
+        s.push(startVertex);
+        
+        while (!s.empty()) {
+            int current = s.top();
+            s.pop();
+            
+            if (!visited[current]) {
+                visited[current] = true;
+                std::cout << current << " ";
+                
+                for (int i = vertexCount - 1; i >= 0; --i) {
+                    if (matrix[current][i] != 0 && !visited[i]) {
+                        s.push(i);
+                    }
+                }
+            }
+        }
+    }
+    
+    void printMatrix() const {
+        for (int i = 0; i < vertexCount; ++i) {
+            for (int j = 0; j < vertexCount; ++j) {
+                std::cout << matrix[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+};
+4 Граф на основе списка смежности 
+#include <vector>
+#include <list>
+#include <iostream>
+#include <queue>
+#include <stack>
+
+class AdjacencyListGraph {
+private:
+    struct Edge {
+        int destination;
+        int weight;
+        
+        Edge(int dest, int w = 1) : destination(dest), weight(w) {}
+    };
+    
+    std::vector<std::list<Edge>> adjacencyList;
+    int vertexCount;
+    bool isDirected;
+
+public:
+    AdjacencyListGraph(int n, bool directed = false) 
+        : vertexCount(n), isDirected(directed) {
+        adjacencyList.resize(n);
+    }
+    
+    void addEdge(int from, int to, int weight = 1) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            adjacencyList[from].emplace_back(to, weight);
+            if (!isDirected) {
+                adjacencyList[to].emplace_back(from, weight);
+            }
+        }
+    }
+    
+    void removeEdge(int from, int to) {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            adjacencyList[from].remove_if([to](const Edge& e) { 
+                return e.destination == to; 
+            });
+            
+            if (!isDirected) {
+                adjacencyList[to].remove_if([from](const Edge& e) { 
+                    return e.destination == from; 
+                });
+            }
+        }
+    }
+    
+    bool hasEdge(int from, int to) const {
+        if (from >= 0 && from < vertexCount && to >= 0 && to < vertexCount) {
+            for (const auto& edge : adjacencyList[from]) {
+                if (edge.destination == to) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    // Поиск в ширину (BFS)
+    void BFS(int startVertex) const {
+        std::vector<bool> visited(vertexCount, false);
+        std::queue<int> q;
+        
+        visited[startVertex] = true;
+        q.push(startVertex);
+        
+        while (!q.empty()) {
+            int current = q.front();
+            q.pop();
+            std::cout << current << " ";
+            
+            for (const auto& edge : adjacencyList[current]) {
+                if (!visited[edge.destination]) {
+                    visited[edge.destination] = true;
+                    q.push(edge.destination);
+                }
+            }
+        }
+    }
+    
+    // Поиск в глубину (DFS) - итеративный
+    void DFS(int startVertex) const {
+        std::vector<bool> visited(vertexCount, false);
+        std::stack<int> s;
+        
+        s.push(startVertex);
+        
+        while (!s.empty()) {
+            int current = s.top();
+            s.pop();
+            
+            if (!visited[current]) {
+                visited[current] = true;
+                std::cout << current << " ";
+                
+                // Добавляем соседей в обратном порядке для сохранения порядка обхода
+                std::stack<int> temp;
+                for (const auto& edge : adjacencyList[current]) {
+                    if (!visited[edge.destination]) {
+                        temp.push(edge.destination);
+                    }
+                }
+                while (!temp.empty()) {
+                    s.push(temp.top());
+                    temp.pop();
+                }
+            }
+        }
+    }
+    
+    // Рекурсивный DFS
+    void DFSRecursive(int startVertex) const {
+        std::vector<bool> visited(vertexCount, false);
+        DFSRecursive(startVertex, visited);
+    }
+    
+    void printAdjacencyList() const {
+        for (int i = 0; i < vertexCount; ++i) {
+            std::cout << i << ": ";
+            for (const auto& edge : adjacencyList[i]) {
+                std::cout << "-> " << edge.destination;
+                if (edge.weight != 1) {
+                    std::cout << "(" << edge.weight << ")";
+                }
+                std::cout << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+private:
+    void DFSRecursive(int vertex, std::vector<bool>& visited) const {
+        visited[vertex] = true;
+        std::cout << vertex << " ";
+        
+        for (const auto& edge : adjacencyList[vertex]) {
+            if (!visited[edge.destination]) {
+                DFSRecursive(edge.destination, visited);
+            }
+        }
+    }
+};
