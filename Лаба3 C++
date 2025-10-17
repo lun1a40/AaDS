@@ -1,4 +1,4 @@
-Биномиальная куча 
+1 Бинарная куча 
 #include <vector>
 #include <algorithm>
 
@@ -53,7 +53,110 @@ public:
     bool empty() const { return heap.empty(); }
     size_t size() const { return heap.size(); }
 };
-2 Хэш-таблица
+2 Биномиальная куча
+#include <vector>
+#include <algorithm>
+
+template<typename T>
+class BinomialHeap {
+private:
+    struct Node {
+        T key;
+        int degree;
+        Node* parent;
+        Node* child;
+        Node* sibling;
+        
+        Node(T k) : key(k), degree(0), parent(nullptr), 
+                   child(nullptr), sibling(nullptr) {}
+    };
+    
+    Node* head;
+    
+    Node* mergeTrees(Node* a, Node* b) {
+        if (a->key > b->key) std::swap(a, b);
+        b->parent = a;
+        b->sibling = a->child;
+        a->child = b;
+        a->degree++;
+        return a;
+    }
+    
+    Node* mergeHeaps(Node* h1, Node* h2) {
+        if (!h1) return h2;
+        if (!h2) return h1;
+        
+        Node* newHead = nullptr;
+        Node** current = &newHead;
+        
+        while (h1 && h2) {
+            if (h1->degree <= h2->degree) {
+                *current = h1;
+                h1 = h1->sibling;
+            } else {
+                *current = h2;
+                h2 = h2->sibling;
+            }
+            current = &((*current)->sibling);
+        }
+        
+        *current = h1 ? h1 : h2;
+        return newHead;
+    }
+    
+    void unionHeap(Node* other) {
+        head = mergeHeaps(head, other);
+        if (!head) return;
+        
+        Node* prev = nullptr;
+        Node* curr = head;
+        Node* next = curr->sibling;
+        
+        while (next) {
+            if (curr->degree != next->degree || 
+                (next->sibling && next->sibling->degree == curr->degree)) {
+                prev = curr;
+                curr = next;
+            } else if (curr->key <= next->key) {
+                curr->sibling = next->sibling;
+                mergeTrees(curr, next);
+            } else {
+                if (!prev) head = next;
+                else prev->sibling = next;
+                mergeTrees(next, curr);
+                curr = next;
+            }
+            next = curr->sibling;
+        }
+    }
+
+public:
+    BinomialHeap() : head(nullptr) {}
+    
+    void insert(const T& key) {
+        BinomialHeap temp;
+        temp.head = new Node(key);
+        unionHeap(temp.head);
+        temp.head = nullptr;
+    }
+    
+    T getMinimum() {
+        if (!head) throw std::runtime_error("Heap is empty");
+        
+        Node* minNode = head;
+        Node* current = head->sibling;
+        
+        while (current) {
+            if (current->key < minNode->key)
+                minNode = current;
+            current = current->sibling;
+        }
+        return minNode->key;
+    }
+    
+    // Другие методы опущены для краткости
+};
+3 Хэш-таблица
 #include <vector>
 #include <list>
 #include <functional>
