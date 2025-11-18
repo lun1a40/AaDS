@@ -72,6 +72,8 @@ def test_merge(f):
 
     print("Тестируем:", f.__doc__)
     print("TEST3 ", end="")
+
+
     print("OK" if f([123], [1,2,3]) == [1,2,3, 123] else "FAIL")
 test_merge(merge)
 print("")
@@ -106,6 +108,47 @@ def test_sort_merge(f):
      f(A)
      print("OK" if A == [1, 2, 3, 4,5] else "FAIL")
 test_sort_merge(sort_merge)
+
+def hoara_sort(A):
+    """cортировка Тони Хоара (quick sort)"""
+    if len(A)<=1:
+        return
+    L=[]
+    M=[]
+    R=[]
+    barrier=A[0]
+    for x in A:
+        if x<barrier:
+            L.append(x)
+        elif x>barrier:
+            R.append(x)
+        else:
+            M.append(x)
+    hoara_sort(L)
+    hoara_sort(R)
+    k=0
+    for x in L+M+R:
+        A[k]=x
+        k+=1
+def test_function(f):
+    print("Тестируем:", f.__doc__)
+    print("TEST1", end=" ")
+    A=[33,33]
+    hoara_sort(A)
+    print("OK" if A==[33,33] else "FAIL")
+
+    print("Тестируем:", f.__doc__)
+    print("TEST2", end=" ")
+    A=[6,7,6,5,4,3,2,1]
+    hoara_sort(A)
+    print("OK" if A==[1,2,3,4,5,6,6,7] else "FAIL")
+
+    print("Тестируем:", f.__doc__)
+    print("TEST3", end=" ")
+    A=[1]
+    hoara_sort(A)
+    print("OK" if A==[1] else "FAIL")
+test_function(hoara_sort)
 
 
 
