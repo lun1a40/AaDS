@@ -1,0 +1,264 @@
+def pancake_sort(A):
+    """блинная сортировка"""
+    arr = A.copy()
+
+    for curr_size in range(len(arr), 1, -1):
+        # Находим индекс максимального элемента
+        mi = arr.index(max(arr[:curr_size]))
+
+        # Если максимальный элемент не на своем месте
+        if mi != curr_size - 1:
+            # Переворачиваем до максимального элемента
+            arr = arr[:mi + 1][::-1] + arr[mi + 1:]
+            # Переворачиваем весь сегмент
+            arr = arr[:curr_size][::-1] + arr[curr_size:]
+
+    return arr
+
+def test_pancake_sort(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    A = [5, 2, 8, 1, 9]
+    expected = [1, 2, 5, 8, 9]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST2", end=" ")
+    A = [3, 1, 2]
+    expected = [1, 2, 3]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST3", end=" ")
+    A = [1]
+    expected = [1]
+    print("OK" if f(A) == expected else "FAIL")
+test_pancake_sort(pancake_sort)
+print("")
+
+
+def pancake_sort(A):
+    """блинная сортировка"""
+    arr = A.copy()
+
+    for curr_size in range(len(arr), 1, -1):
+        # Находим индекс максимального элемента
+        mi = arr.index(max(arr[:curr_size]))
+
+        # Если максимальный элемент не на своем месте
+        if mi != curr_size - 1:
+            # Переворачиваем до максимального элемента
+            arr = arr[:mi + 1][::-1] + arr[mi + 1:]
+            # Переворачиваем весь сегмент
+            arr = arr[:curr_size][::-1] + arr[curr_size:]
+
+    return arr
+
+
+def test_pancake_sort(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    A = [5, 2, 8, 1, 9]
+    expected = [1, 2, 5, 8, 9]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST2", end=" ")
+    A = [3, 1, 2]
+    expected = [1, 2, 3]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST3", end=" ")
+    A = [1]
+    expected = [1]
+    print("OK" if f(A) == expected else "FAIL")
+
+
+test_pancake_sort(pancake_sort)
+print("")
+
+
+def bead_sort(A):
+    """сортировка бусинами (гравитационная)"""
+    if not A:
+        return A
+
+    # Создаем "стержни с бусинами"
+    max_val = max(A)
+    beads = [[0] * max_val for _ in range(len(A))]
+
+    # Распределяем бусины
+    for i, num in enumerate(A):
+        for j in range(num):
+            beads[i][j] = 1
+
+    # Гравитация - бусины падают вниз
+    for j in range(max_val):
+        sum_col = sum(beads[i][j] for i in range(len(A)))
+        for i in range(len(A)):
+            beads[i][j] = 1 if len(A) - i <= sum_col else 0
+
+    # Считаем результат
+    result = []
+    for i in range(len(A)):
+        result.append(sum(beads[i]))
+
+    return result
+
+
+def test_bead_sort(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    A = [3, 1, 4, 1, 5]
+    expected = [1, 1, 3, 4, 5]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST2", end=" ")
+    A = [2, 2, 2]
+    expected = [2, 2, 2]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST3", end=" ")
+    A = [5]
+    expected = [5]
+    print("OK" if f(A) == expected else "FAIL")
+
+
+test_bead_sort(bead_sort)
+print("")
+
+
+def jump_search(A, key):
+    """поиск скачками"""
+    import math
+    n = len(A)
+
+    # Определяем размер прыжка
+    step = int(math.sqrt(n))
+    prev = 0
+
+    # Прыгаем вперед
+    while A[min(step, n) - 1] < key:
+        prev = step
+        step += int(math.sqrt(n))
+        if prev >= n:
+            return 0
+
+    # Линейный поиск в блоке
+    while A[prev] < key:
+        prev += 1
+        if prev == min(step, n):
+            return 0
+
+    # Проверяем найденный элемент
+    if A[prev] == key:
+        return 1
+
+    return 0
+
+
+def test_jump_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1, 2, 3, 4, 5, 6, 7, 8, 9], 5) == 1 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 2, 3, 4, 5, 6, 7, 8, 9], 10) == 0 else "FAIL")
+
+    print("TEST3", end=" ")
+    print("OK" if f([1], 1) == 1 else "FAIL")
+
+
+test_jump_search(jump_search)
+print("")
+
+
+def exponential_search(A, key):
+    """экспоненциальный поиск"""
+    n = len(A)
+
+    if n == 0:
+        return 0
+
+    # Если элемент в начале
+    if A[0] == key:
+        return 1
+
+    # Находим диапазон для бинарного поиска
+    i = 1
+    while i < n and A[i] <= key:
+        i *= 2
+
+    # Бинарный поиск в найденном диапазоне
+    low = i // 2
+    high = min(i, n - 1)
+
+    while low <= high:
+        mid = (low + high) // 2
+        if A[mid] == key:
+            return 1
+        elif A[mid] < key:
+            low = mid + 1
+        else:
+            high = mid - 1
+
+    return 0
+
+
+def test_exponential_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1, 2, 3, 4, 5, 6, 7, 8, 9], 5) == 1 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 2, 3, 4, 5, 6, 7, 8, 9], 10) == 0 else "FAIL")
+
+    print("TEST3", end=" ")
+    print("OK" if f([1, 10, 20, 30, 40, 50], 30) == 1 else "FAIL")
+
+
+test_exponential_search(exponential_search)
+print("")
+
+
+def ternary_search(A, key):
+    """тернарный поиск"""
+    low, high = 0, len(A) - 1
+
+    while low <= high:
+        mid1 = low + (high - low) // 3
+        mid2 = high - (high - low) // 3
+
+        if A[mid1] == key:
+            return 1
+        if A[mid2] == key:
+            return 1
+
+        if key < A[mid1]:
+            high = mid1 - 1
+        elif key > A[mid2]:
+            low = mid2 + 1
+        else:
+            low = mid1 + 1
+            high = mid2 - 1
+
+    return 0
+
+
+def test_ternary_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1, 2, 3, 4, 5, 6, 7, 8, 9], 5) == 1 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 2, 3, 4, 5, 6, 7, 8, 9], 10) == 0 else "FAIL")
+
+    print("TEST3", end=" ")
+    print("OK" if f([1, 3, 5, 7, 9, 11, 13, 15], 7) == 1 else "FAIL")
+
+
+test_ternary_search(ternary_search)
+print("")
