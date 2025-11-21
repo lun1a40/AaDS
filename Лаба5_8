@@ -41,7 +41,7 @@ print("")
 test_sort(choice_sort)
 print("")
 test_sort(bubble_sort)
-
+print("")
 
 def merge(A, B):
     """слияние двух отсортированных массивов"""
@@ -66,14 +66,11 @@ def test_merge(f):
     print("TEST1 ", end="")
     print("OK" if f([123], [4567])==[123, 4567] else "FAIL" )
 
-    print("Тестируем:", f.__doc__)
+
     print("TEST2 ", end="")
     print("OK" if f([123], []) == [123] else "FAIL")
 
-    print("Тестируем:", f.__doc__)
     print("TEST3 ", end="")
-
-
     print("OK" if f([123], [1,2,3]) == [1,2,3, 123] else "FAIL")
 test_merge(merge)
 print("")
@@ -96,18 +93,17 @@ def test_sort_merge(f):
      f(A)
      print("OK" if A==[1,2,3,4] else "FAIL" )
 
-     print("Тестируем:", f.__doc__)
      print("TEST2 ", end="")
      A = [4]
      f(A)
      print("OK" if A == [4] else "FAIL")
 
-     print("Тестируем:", f.__doc__)
      print("TEST3 ", end="")
      A = [4, 3, 2, 1,5]
      f(A)
      print("OK" if A == [1, 2, 3, 4,5] else "FAIL")
 test_sort_merge(sort_merge)
+print("")
 
 def hoara_sort(A):
     """cортировка Тони Хоара (quick sort)"""
@@ -137,19 +133,253 @@ def test_function(f):
     hoara_sort(A)
     print("OK" if A==[33,33] else "FAIL")
 
-    print("Тестируем:", f.__doc__)
     print("TEST2", end=" ")
     A=[6,7,6,5,4,3,2,1]
     hoara_sort(A)
     print("OK" if A==[1,2,3,4,5,6,6,7] else "FAIL")
 
-    print("Тестируем:", f.__doc__)
     print("TEST3", end=" ")
     A=[1]
     hoara_sort(A)
     print("OK" if A==[1] else "FAIL")
 test_function(hoara_sort)
+print("")
+def left_boundary(A, key):
+    left = -1
+    right = len(A)
+    while right - left > 1:
+        middle = (left+right) // 2
+        if A[middle] < key:
+            left = middle
+        else:
+            right = middle
+    return left
+def right_boundary(A, key):
+    left = -1
+    right = len(A)
+    while right - left > 1:
+        middle = (left + right) // 2
+        if A[middle] <= key:
+            left = middle
+        else:
+            right = middle
+    return right
 
+def binary_search(A, key):
+    """бинарный поиск"""
+    left = left_boundary(A, key)
+    right = right_boundary(A, key)
+    if right-left>1:
+        return 1
+    return 0
+
+def test_binary_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1,1],2)==0 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 3,4,5,6], 2) == 0 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 1,2,2,2,2,2,2], 2) == 1 else "FAIL")
+test_binary_search(binary_search)
+print("")
+def sequential_search(A, key):
+    """последовательный поиск"""
+    for i in range(len(A)):
+        if A[i] == key:
+            return 1
+    return 0
+
+def test_sequential_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1,1],2)==0 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 3,4,5,6], 2) == 0 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 1,2,2,2,2,2,2], 2) == 1 else "FAIL")
+
+test_sequential_search(sequential_search)
+print("")
+def shell_sort(A):
+    """сортировка Шелла"""
+    n = len(A)
+    gap = n // 2
+
+    while gap > 0:
+        for i in range(gap, n):
+            temp = A[i]
+            j = i
+            while j >= gap and A[j - gap] > temp:
+                A[j] = A[j - gap]
+                j -= gap
+            A[j] = temp
+        gap //= 2
+    return A
+
+def test_shell_sort(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    A = [5, 2, 8, 1, 9]
+    expected = [1, 2, 5, 8, 9]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST2", end=" ")
+    A = [1, 1, 1, 1]
+    expected = [1, 1, 1, 1]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST3", end=" ")
+    A = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+    expected = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    print("OK" if f(A) == expected else "FAIL")
+test_shell_sort(shell_sort)
+print("")
+def heap_sort(A):
+    """пирамидальная сортировка"""
+    n = len(A)
+
+    # Построение max-кучи
+    for i in range(n // 2 - 1, -1, -1):
+        heapify(A, n, i)
+
+    # Извлечение элементов из кучи один за другим
+    for i in range(n - 1, 0, -1):
+        A[i], A[0] = A[0], A[i]  # перемещаем корень в конец
+        heapify(A, i, 0)  # вызываем heapify на уменьшенной куче
+
+    return A
+
+
+def heapify(A, n, i):
+    """вспомогательная функция для построения кучи"""
+    largest = i  # инициализируем наибольший элемент как корень
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    # Если левый дочерний элемент больше корня
+    if left < n and A[left] > A[largest]:
+        largest = left
+
+    # Если правый дочерний элемент больше, чем самый большой элемент на данный момент
+    if right < n and A[right] > A[largest]:
+        largest = right
+
+    # Если самый большой элемент не корень
+    if largest != i:
+        A[i], A[largest] = A[largest], A[i]  # меняем местами
+        heapify(A, n, largest)  # рекурсивно преобразуем в кучу затронутое поддерево
+
+def test_heap_sort(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    A = [5, 2, 8, 1, 9]
+    expected = [1, 2, 5, 8, 9]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST2", end=" ")
+    A = [1, 1, 1, 1]
+    expected = [1, 1, 1, 1]
+    print("OK" if f(A) == expected else "FAIL")
+
+    print("TEST3", end=" ")
+    A = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+    expected = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    print("OK" if f(A) == expected else "FAIL")
+test_heap_sort(heap_sort)
+print("")
+def interpolation_search(A, key):
+    """интерполирующий поиск"""
+    low = 0
+    high = len(A) - 1
+
+    while low <= high and key >= A[low] and key <= A[high]:
+        # Вычисляем позицию с помощью интерполяционной формулы
+        pos = low + ((key - A[low]) * (high - low)) // (A[high] - A[low])
+
+        if A[pos] == key:
+            return 1
+        elif A[pos] < key:
+            low = pos + 1
+        else:
+            high = pos - 1
+
+    return 0
+
+def test_interpolation_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1, 1], 2) == 0 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 3, 4, 5, 6], 2) == 0 else "FAIL")
+
+    print("TEST3", end=" ")
+    print("OK" if f([1, 1, 2, 2, 2, 2, 2, 2], 2) == 1 else "FAIL")
+test_interpolation_search(interpolation_search)
+print("")
+def fibonacci_search(A, key):
+    """поиск Фибоначчи"""
+    n = len(A)
+
+    # Генерируем числа Фибоначчи до числа >= n
+    fib_m2 = 0  # F(m-2)
+    fib_m1 = 1  # F(m-1)
+    fib_m = fib_m2 + fib_m1  # F(m)
+
+    while fib_m < n:
+        fib_m2 = fib_m1
+        fib_m1 = fib_m
+        fib_m = fib_m2 + fib_m1
+
+    # Инициализируем переменные
+    offset = -1
+
+    while fib_m > 1:
+        # Проверяем valid index
+        i = min(offset + fib_m2, n - 1)
+
+        if A[i] < key:
+            # Сдвигаем на три числа Фибоначчи вниз
+            fib_m = fib_m1
+            fib_m1 = fib_m2
+            fib_m2 = fib_m - fib_m1
+            offset = i
+        elif A[i] > key:
+            # Сдвигаем на три числа Фибоначчи вверх
+            fib_m = fib_m2
+            fib_m1 = fib_m1 - fib_m2
+            fib_m2 = fib_m - fib_m1
+        else:
+            return 1
+
+    # Проверяем последний элемент
+    if fib_m1 and offset + 1 < n and A[offset + 1] == key:
+        return 1
+
+    return 0
+
+def test_fibonacci_search(f):
+    print("Тестируем:", f.__doc__)
+
+    print("TEST1", end=" ")
+    print("OK" if f([1, 1], 2) == 0 else "FAIL")
+
+    print("TEST2", end=" ")
+    print("OK" if f([1, 3, 4, 5, 6], 2) == 0 else "FAIL")
+
+    print("TEST3", end=" ")
+    print("OK" if f([1, 1, 2, 2, 2, 2, 2, 2], 2) == 1 else "FAIL")
+test_fibonacci_search(fibonacci_search)
 
 
 
